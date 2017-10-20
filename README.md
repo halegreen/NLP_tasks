@@ -6,7 +6,7 @@ This implementation basicly refereced tensorflow's word2vec implementation of th
 According to the main difference of above two model, I just change the **generate_batch(...)** function in **word2vec_fns.py**. 
 
 ### Usage
-1.Get embeddings,If this completes without error, you should see a file called CBOW_Embeddings.npy in the current directory, which you will need to submit along with your version of word2vec_fns.py:
+1.Get embeddings,If this completes without error, you should see a file called CBOW_Embeddings.npy in the current directory:
 ```
 > python3 word2vec_cbow.py
 ```
