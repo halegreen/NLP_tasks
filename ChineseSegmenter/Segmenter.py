@@ -132,7 +132,7 @@ class Segmenter:
         return best_prev_node, max_prob
 
 
-    def max_prob_seg(self, sequence):
+    def max_prob_seg(self, original_sq, sequence):
         # ## 加入头结点
         # first_state = {}
         # first_state['best_prev_node'] = -1
@@ -144,19 +144,18 @@ class Segmenter:
             # node = sequence[node_idx]['pos']
             best_prev_ndoe, cur_prob = self.get_best_prev_node_2(sequence, node)
             prev_node_map[node] = best_prev_ndoe
-            print("node: " + str(node) + " " + "best prev node: " + str(best_prev_ndoe))
+            # print("node: " + str(node) + " " + "best prev node: " + str(best_prev_ndoe))
 
         ## 得到最大概率的划分序列
         ## 确定终点词的序号
         end_word = len(sequence) - 1
         end_freq = sequence[end_word]['word_freq']
         for i in range(len(sequence)):
-            if sequence[i]['pos'] + sequence[i]['length'] == len(sequence):
-                if sequence[i]['freq'] > end_freq:
-                    print(end_word, end_freq)
+            if sequence[i]['pos'] + sequence[i]['length'] == len(original_sq):
+                if sequence[i]['word_freq'] > end_freq:
                     end_word = i
                     end_freq = sequence[i]['word_freq']
-        print("end word : " + str(end_word))
+        # print("end word : " + str(end_word))
 
         seg_sequence = ""
         word_index = end_word
@@ -164,31 +163,13 @@ class Segmenter:
             seg_sequence = sequence[word_index]['word'] + " " + seg_sequence
             word_index = prev_node_map[word_index]
 
-        # seg_index = []
-        # node_idx = sequence[len(sequence) - 1]['pos']
-        # seg_index.append(node_idx)
-        # while node_idx is not -1:
-        #     prev_node = prev_node_map[node_idx]
-        #     if prev_node == -1:
-        #         break
-        #     seg_index.append(prev_node)
-        #     node_idx = prev_node
-        # seg_index.reverse()
-        # ##
-        # seg_sequence = []
-        # for i in range(len(seg_index)):
-        #     for j in range(len(sequence)):
-        #         if sequence[j]['pos'] == i:
-        #             final_word = sequence[j]['word']
-        #     seg_sequence.append(final_word)
-        # seg_sequence = ' '.join(seg_sequence)
-        return seg_sequence
+        return seg_sequence.strip()
 
 
 
 if __name__ == '__main__':
-    # seqeunce = input("请输入待切分的句子：")
-    sequence = "他们有意见分歧"
+    sequence = input("请输入待切分的句子：")
+    # sequence = "今天天气真好"
     sg = Segmenter()
     candidate_sq = sg.get_candidate_word(sequence)
 
@@ -196,5 +177,5 @@ if __name__ == '__main__':
     #     print(c)
 
     sg.get_acc_prob(candidate_sq)
-    seg_sq = sg.max_prob_seg(candidate_sq)
-    print(seg_sq)
+    seg_sq = sg.max_prob_seg(sequence, candidate_sq)
+    print("切分完毕： " + seg_sq)
