@@ -18,4 +18,26 @@ And you should see this:
 ![](https://raw.githubusercontent.com/ZoeShaw101/NLP_tasks/master/Word2Vec_CBOW/docs/tsne_embeddings.png)
 
 
+## Task2: Chinese Word Segmenter
+### About
+This is a chinese segmenter implemented using the Max-Probability model.
+
+### Usage
+1.Get word dict
+```
+python CreateDict.py
+```
+2. run segmenter
+```
+python Segmenter.py
+```
+
+### To-do
+Using some more complex model, sach as RCF, LSTM...etc.
+
+
+
+
+
+
 
