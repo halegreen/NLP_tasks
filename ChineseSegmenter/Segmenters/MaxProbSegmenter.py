@@ -8,13 +8,14 @@ output: segmented file
 
 import sys
 import math
-from ChineseSegmenter.CreateDict import Dictionary
+from ChineseSegmenter.Segmenters import BaseSegmenter
 
-class Segmenter:
+class MaxProbSegmenter(BaseSegmenter.BaseSegmenter):
+
     def __init__(self):
-        self.word_dict = Dictionary('199801.txt')
+        super(MaxProbSegmenter, self).__init__()
+        self.__node_prob_map = {}
         self.node_list_states = []
-        self.node_prob_map = {}
 
 
     def get_candidate_word(self, sequence):
@@ -30,8 +31,8 @@ class Segmenter:
                 word = sequence[i: i + word_len]
                 if self.word_dict.dict_1_gram.__contains__(word):
                     word_freq = self.word_dict.dict_1_gram[word]
-                elif self.word_dict.dict_2_gram.__contains__(word):
-                    word_freq = self.word_dict.dict_2_gram[word]
+                # elif self.word_dict.dict_2_gram.__contains__(word):
+                #     word_freq = self.word_dict.dict_2_gram[word]
                 elif len(word) == 1:
                     word_freq = 0
                 else:
@@ -59,8 +60,8 @@ class Segmenter:
                 prev_node_dix = i - 1
                 comb_word = sequence[prev_node_dix]['word'] + sequence[i]['word']
                 prob = sequence[i]['word_freq'] * self.get_2_gram_prob(comb_word)  ## 累积概率
-            if not self.node_prob_map.__contains__(i):
-                self.node_prob_map[i] = prob
+            if not self.__node_prob_map.__contains__(i):
+                self.__node_prob_map[i] = prob
 
 
     def get_best_prev_node_2(self, sequence, node_idx):
@@ -73,7 +74,7 @@ class Segmenter:
             for word_idx in range(node_idx):
                 if sequence[word_idx]['pos'] + sequence[word_idx]['length'] == sequence[node_idx]['pos']:
                     prev_node_list.append((word_idx,
-                                           self.node_prob_map[word_idx]))
+                                           self.__node_prob_map[word_idx]))
 
         best_prev_node, cur_prob = max(prev_node_list, key=lambda x: x[1])
         return (best_prev_node, cur_prob)
@@ -99,11 +100,11 @@ class Segmenter:
 
     def get_unkonw_word_prob(self, word, gram):
         if gram == 1:
-            return math.log(10. / self.word_dict.total_word_count * 10 ** len(word))
-            # return 0
+            # return math.log(10. / self.word_dict.total_word_count * 10 ** len(word))
+            return 1
         else:
-            return math.log(10. / self.word_dict.total_word_count * 10 ** len(word))
-            # return 0
+            # return math.log(10. / self.word_dict.total_word_count * 10 ** len(word))
+            return 1
 
 
     ## bug exist
@@ -166,16 +167,18 @@ class Segmenter:
         return seg_sequence.strip()
 
 
-
-if __name__ == '__main__':
-    sequence = input("请输入待切分的句子：")
-    # sequence = "今天天气真好"
-    sg = Segmenter()
+def main():
+    # sequence = input("请输入待切分的句子：")
+    sequence = "本报讯春节临近"
+    sg = MaxProbSegmenter()
     candidate_sq = sg.get_candidate_word(sequence)
-
-    # for c in candidate_sq:
-    #     print(c)
-
+    for c in candidate_sq:
+        print(c)
     sg.get_acc_prob(candidate_sq)
     seg_sq = sg.max_prob_seg(sequence, candidate_sq)
     print("切分完毕： " + seg_sq)
+
+
+
+if __name__ == '__main__':
+    main()
