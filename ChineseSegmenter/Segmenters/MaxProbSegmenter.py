@@ -15,6 +15,7 @@ class MaxProbSegmenter(BaseSegmenter.BaseSegmenter):
     def __init__(self):
         super(MaxProbSegmenter, self).__init__()
         self.__node_prob_map = {}
+        self.__all_paths = {}
         self.node_list_states = []
 
 
@@ -134,10 +135,6 @@ class MaxProbSegmenter(BaseSegmenter.BaseSegmenter):
 
 
     def max_prob_seg(self, original_sq, sequence):
-        # ## 加入头结点
-        # first_state = {}
-        # first_state['best_prev_node'] = -1
-        # first_state['cur_prob'] = 0
 
         prev_node_map = {}
         ## 计算每个结点的最优左邻点
@@ -167,16 +164,65 @@ class MaxProbSegmenter(BaseSegmenter.BaseSegmenter):
         return seg_sequence.strip()
 
 
-def main():
+
+    def max_prob_seg2(self, original_sequence, candidates):
+        n = len(original_sequence)
+        start_nodes = []
+        for i in range(len(candidates)):
+            if candidates[i]['pos'] == 0:
+                start_nodes.append(i)
+
+        for start_node in start_nodes:
+            tmp_path = []
+            tmp_path.append(candidates[start_node]['word'])
+            path_prob = 1.0
+            path_prob *= self.__node_prob_map[start_node]
+            self.__find_all_paths(tmp_path, start_node, candidates, path_prob, n)
+
+        # for path, prob in self.__all_paths.items():
+        #     print(path, prob)
+        # print()
+        res = sorted(self.__all_paths.items(), key=lambda x: x[1], reverse=True)
+        # print(res[0])
+
+        return res[0][0]
+
+
+
+    def __find_all_paths(self, tmp_path, cur_node, candidates, path_prob, n):
+        if candidates[cur_node]['pos'] + candidates[cur_node]['length'] == n:
+            cur_path = ' '.join(tmp_path)
+            if cur_path not in self.__all_paths:
+                self.__all_paths[cur_path] = path_prob
+            return
+
+        next_node = candidates[cur_node]['pos'] + candidates[cur_node]['length']
+        next_node_list = []
+        for i in range(len(candidates)):
+            if candidates[i]['pos'] == next_node:
+                next_node_list.append(i)
+
+        for i in next_node_list:
+            tmp_path.append(candidates[i]['word'])
+            path_prob *= self.__node_prob_map[next_node]
+            self.__find_all_paths(tmp_path, i, candidates, path_prob, n)
+            tmp_path.pop()
+
+
+
+def main(sequence):
     # sequence = input("请输入待切分的句子：")
-    sequence = "本报讯春节临近"
+    if sequence == None:
+        sequence = "本报讯春节临近"
     sg = MaxProbSegmenter()
     candidate_sq = sg.get_candidate_word(sequence)
     for c in candidate_sq:
         print(c)
     sg.get_acc_prob(candidate_sq)
-    seg_sq = sg.max_prob_seg(sequence, candidate_sq)
+    # seg_sq = sg.max_prob_seg(sequence, candidate_sq)
+    seg_sq = sg.max_prob_seg2(sequence, candidate_sq)
     print("切分完毕： " + seg_sq)
+
 
 
 
